@@ -1,0 +1,133 @@
+@startuml
+
+class User {
+  +login: string
+  -password_hash: string
+  +location: string
+  +role: string
+  +register(login: string, password: string)
+  +login_system(login: string, password: string)
+  +update_location(new_location: string)
+}
+
+class Car {
+  +number: string
+  +condition: string
+  +fuel_consumption: double
+  +check_condition()
+  +update_location(new_location: string)
+}
+
+
+class Driver {
+  +license_number: string
+  +car: Car
+  +rating: double
+  +accept_order(order: Order)
+  +complete_order(order: Order)
+  +update_rating(new_rating: double)
+}
+
+class Client {
+  +address: string
+  +order: Order
+  +create_order(start_address: string, end_address: string)
+  +pay_order(order: Order, payment_method: string)
+}
+
+class Order {
+  +id: int
+  +cost: double
+  +start_address: string
+  +end_address: string
+  +status: string
+  +driver: Driver
+  +client: Client
+  +start_time: time_t
+  +end_time: time_t
+  +current_location: string
+  +calculate_cost(fuel_consumption: double, distance: double)
+  +track(current_location: string)
+  +change_status(new_status: string)
+  +set_driver(driver: Driver)
+}
+
+class Database {
+  +save_data(data: map<string, string>)
+  +get_data(key: string)
+}
+
+class System {
+  +start()
+  +stop()
+  +handle_error(error: string)
+}
+
+class Payment {
+  +transaction_id: int
+  +amount: double
+  +payment_method: string
+  +conduct_transaction(amount: double, payment_method: string)
+  +refund(transaction_id: int)
+}
+
+class Review {
+  +id: int
+  +text: string
+  +rating: int
+  +client: Client
+  +driver: Driver
+  +view_review(id: int)
+}
+
+class SupportService {
+  +id: int
+  -requests: list<string>
+  +get_request(request: string)
+  +send_response(response: string)
+}
+
+User <|-- Driver : Наследуется
+User <|-- Client : Наследуется
+Client "1" -- "0..*" Order : Создает >
+Driver "1" -- "0..*" Order : Принимает >
+Driver o-- "1" Car : Использует >
+Order *-- "1" Payment : Содержит >
+System "1" -- "1" Database : Взаимодействует >
+Review "0..*" -- "1" Database : Использует >
+Client "1" -- "0..*" Review : Оставляет >
+User "0..*" -- "1" SupportService : Обращается >
+Order "0..*" -- "1" Database : Использует >
+
+@enduml
+
+@startuml
+title Жизненный цикл статуса заказа онлайн такси
+
+[*] --> Создан : Создать заказ
+note right of Создан : Заказ создан клиентом,\nно еще не принят водителем.
+
+Создан --> Отменен : Отменить заказ
+note right of Отменен : Заказ отменен клиентом\nдо его принятия водителем.
+
+Создан --> Принят : Принять заказ
+note right of Принят : Заказ принят водителем,\nно еще не начат.
+
+Принят --> Отменен : Отменить заказ
+note bottom of Отменен : Заказ отменен клиентом\nили водителем после его принятия.
+
+Принят --> В_пути : Начать выполнение заказа
+note right of В_пути : Водитель начал выполнение заказа\nи движется к месту назначения.
+
+В_пути --> Завершен : Завершить заказ
+note right of Завершен : Заказ успешно завершен.
+
+Завершен --> [*]
+Отменен --> [*]
+
+@enduml
+
+
+
+
+
